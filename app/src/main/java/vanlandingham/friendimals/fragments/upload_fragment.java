@@ -67,12 +67,12 @@ public class upload_fragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         //TODO: finish the camera layout, add functionality by letting users click on photos button or allow them to take picture
-        //TODO: create two fragments seperately that will populate the viewpager container when the tab is switched. Do this in the getView function of the ViewPager adapter. Finish both layouts.
+        //TODO: create two fragments separately that will populate the viewpager container when the tab is switched. Do this in the getView function of the ViewPager adapter. Finish both layouts.
 
         View view = inflater.inflate(R.layout.camera_layout, container, false);
         savedInstanceState = getArguments();
         username  = savedInstanceState.getString("username");
-        upload_button = view.findViewById(R.id.upload_button);
+
         tabLayout = view.findViewById(R.id.upload_tabs);
         pager = view.findViewById(R.id.upload_viewPager);
         applicationContext = Home.getContextOfApplication();
