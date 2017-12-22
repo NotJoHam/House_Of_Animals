@@ -1,11 +1,6 @@
 package vanlandingham.friendimals.fragments;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -19,11 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -72,7 +65,7 @@ public class profile_fragment extends Fragment {
         follow_button = view.findViewById(R.id.follow_button);
         edit_profile_button = view.findViewById(R.id.edit_profile_button);
         tabLayout = view.findViewById(R.id.tabs);
-        mViewPager = view.findViewById(R.id.viewPager_container);
+        mViewPager = view.findViewById(R.id.upload_viewPager);
         followers_textView = view.findViewById(R.id.followers_textView);
         following_textView = view.findViewById(R.id.following_textView);
 

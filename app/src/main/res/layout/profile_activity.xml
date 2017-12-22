@@ -28,7 +28,7 @@
         android:background="@drawable/really_rounded_corners"
         android:backgroundTint="@android:color/holo_blue_light"
         android:text="Edit profile"
-        app:layout_constraintBottom_toTopOf="@+id/viewPager_container"
+        app:layout_constraintBottom_toTopOf="@+id/upload_viewPager"
         app:layout_constraintStart_toEndOf="@+id/profile_imageView" />
 
     <TextView
@@ -90,7 +90,7 @@
 
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/viewPager_container"
+        android:id="@+id/upload_viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginEnd="8dp"

@@ -12,8 +12,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,20 +60,28 @@ public class upload_fragment extends android.support.v4.app.Fragment {
     private Button upload_button;
     private String username;
     private String mUserId;
+    private TabLayout tabLayout;
+    private ViewPager pager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         //TODO: finish the camera layout, add functionality by letting users click on photos button or allow them to take picture
+        //TODO: create two fragments seperately that will populate the viewpager container when the tab is switched. Do this in the getView function of the ViewPager adapter. Finish both layouts.
 
         View view = inflater.inflate(R.layout.camera_layout, container, false);
         savedInstanceState = getArguments();
         username  = savedInstanceState.getString("username");
         upload_button = view.findViewById(R.id.upload_button);
+        tabLayout = view.findViewById(R.id.upload_tabs);
+        pager = view.findViewById(R.id.upload_viewPager);
         applicationContext = Home.getContextOfApplication();
         storageReference = FirebaseStorage.getInstance().getReference();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mUserId = FirebaseAuth.getInstance().getUid();
+
+        pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(pager));
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) !=PackageManager.PERMISSION_GRANTED) {
 
