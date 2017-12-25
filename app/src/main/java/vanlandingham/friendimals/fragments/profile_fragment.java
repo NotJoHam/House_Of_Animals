@@ -3,6 +3,7 @@ package vanlandingham.friendimals.fragments;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -52,15 +53,24 @@ public class profile_fragment extends Fragment {
     private SectionsPagerAdapter adapter;
     private boolean is_following = false;
 
+    private View view;
+
     private int follower_count, following_count;
 
     private TextView followers_textView, following_textView;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.profile_activity, container, false);
+        view = inflater.inflate(R.layout.profile_activity, container, false);
 
         follow_button = view.findViewById(R.id.follow_button);
         edit_profile_button = view.findViewById(R.id.edit_profile_button);
@@ -71,6 +81,16 @@ public class profile_fragment extends Fragment {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+
+
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         Bundle bundle = this.getArguments();
         user = bundle.getParcelable("user");
@@ -134,9 +154,6 @@ public class profile_fragment extends Fragment {
         dr.setCornerRadius(2500);
 
         profile_image.setImageDrawable(dr);
-
-
-        return view;
     }
 
     private void check_if_following() {

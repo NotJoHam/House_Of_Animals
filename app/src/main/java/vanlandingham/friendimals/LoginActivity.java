@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -189,7 +190,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                         showProgress(false);
                         if (!task.isSuccessful()) {
                             Log.w( "onComplete: ",task.getException() );
-                            Toast.makeText(LoginActivity.this, "Could Not Register", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Could Not Register: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         } else {
 
                             UsernameDialogFragment dialog = new UsernameDialogFragment();
@@ -213,8 +214,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                                 // signed in user can be handled in the listener.
                                 if (!task.isSuccessful()) {
                                     //Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                    Toast.makeText(LoginActivity.this, "Failed to authenticate",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(LoginActivity.this, "Failed to authenticate; " + task.getException().getMessage(),
+                                            Toast.LENGTH_LONG).show();
                                     showProgress(false);
                                 }
                                 else
@@ -397,6 +398,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                                 dialogue.show(getFragmentManager(), null);
                                 focusView.requestFocus();
                             } else {
+
+                                //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
 
                                 String email = "1@1.com";
                                 //This is used to set the User Object when the user is done registering and has set a username.
