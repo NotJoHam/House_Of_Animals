@@ -1,5 +1,7 @@
 package vanlandingham.friendimals;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,14 +12,25 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.transition.ArcMotion;
+import android.transition.ChangeBounds;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -95,7 +108,12 @@ public class Home extends AppCompatActivity {
     @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            overridePendingTransition(R.anim.slide_right,R.anim.slide_left);
+
             setContentView(R.layout.activity_home);
+
+
+
             setTitle(R.string.home);
 
             contextOfApplication = getApplicationContext();
@@ -106,6 +124,7 @@ public class Home extends AppCompatActivity {
 
             nvDrawer = findViewById(R.id.nvView);
             mDrawerLayout = findViewById(R.id.drawerLayout);
+
             //Initialize the toggle
             mDrawerToggle = setupDrawerToggle();
             username_TextView = findViewById(R.id.userName_textView);
@@ -200,6 +219,7 @@ public class Home extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getBaseContext(),SearchActivity.class);
+
                     startActivityForResult(intent,2);
 
                 }
@@ -215,7 +235,9 @@ public class Home extends AppCompatActivity {
            messages_button.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View view) {
-                   Intent intent = new Intent(getBaseContext(),Messages.class);
+
+                   setUpWindowAnimations();
+                   Intent intent = new Intent(Home.this,Messages.class);
                    startActivity(intent);
                }
            });
@@ -287,10 +309,15 @@ public class Home extends AppCompatActivity {
 * */
     private void selectItemFromDrawer(MenuItem menuItem) {
 
+        android.support.v4.app.Fragment previousFragment;
+
         switch (menuItem.getItemId()) {
 
             case R.id.Home:
+
                 fragmentClass = home_fragment.class;
+
+
 
                 toolbar_text.setText(R.string.app_name);
                 toolbar_text.setTypeface(type);
@@ -349,12 +376,24 @@ public class Home extends AppCompatActivity {
 
         }
 
+        previousFragment = fragmentManager.findFragmentById(R.id.flContent);
+
         //Attempt to create a new fragment class
         try {
             fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Fade fade = new Fade();
+        fade.setDuration(1000);
+        previousFragment.setExitTransition(fade);
+
+        Fade enter_fade = new Fade();
+
+        enter_fade.setStartDelay(2000);
+        enter_fade.setDuration(1000);
+        fragment.setEnterTransition(enter_fade);
 
         fragment.setArguments(bundle);
         fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
@@ -433,6 +472,24 @@ public class Home extends AppCompatActivity {
 
         Intent intent = new Intent(Home.this,LoginActivity.class);
         startActivity(intent);
+
+    }
+
+    public static void setLayoutAnimation(ViewGroup panel,Context context) {
+
+        LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(context,R.anim.alpha_animation);
+        panel.setLayoutAnimation(controller);
+
+    }
+
+    private void setUpWindowAnimations() {
+        Fade fade = new Fade();
+        fade.setDuration(2000);
+        getWindow().setEnterTransition(fade);
+
+        Slide slide = new Slide();
+        slide.setDuration(2000);
+        getWindow().setExitTransition(slide);
 
     }
 

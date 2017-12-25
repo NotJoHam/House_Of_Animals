@@ -4,6 +4,8 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +22,11 @@ public class Messages extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        overridePendingTransition(R.anim.slide_right,R.anim.slide_left);
         setContentView(R.layout.messages_activity);
+
+
 
         back_button = findViewById(R.id.back_button);
         new_chat_button = findViewById(R.id.new_chat_button);
@@ -48,6 +54,17 @@ public class Messages extends AppCompatActivity{
 
         else
             super.onBackPressed();
+
+    }
+
+    private void setUpWindowAnimations() {
+        Slide slide = new Slide();
+        slide.setDuration(1000);
+        getWindow().setExitTransition(slide);
+
+        Fade fade = new Fade();
+        fade.setDuration(1000);
+        getWindow().setEnterTransition(fade);
 
     }
 }

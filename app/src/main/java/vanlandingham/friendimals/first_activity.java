@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Slide;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -45,6 +46,7 @@ public class first_activity extends AppCompatActivity  {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(0,R.anim.slide_left);
         setContentView(R.layout.activity_first);
 
         startup_progress = findViewById(R.id.startup_progress);
@@ -111,6 +113,12 @@ public class first_activity extends AppCompatActivity  {
             startup_progress.setVisibility(show ? View.VISIBLE : View.GONE);
 
         }
+    }
+
+    private void setUpWindowAnimations() {
+        Slide slide = new Slide();
+        slide.setDuration(2000);
+        getWindow().setExitTransition(slide);
     }
 
 

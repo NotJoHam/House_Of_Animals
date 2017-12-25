@@ -1,6 +1,10 @@
 package vanlandingham.friendimals.fragments;
 
 import android.os.Bundle;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +38,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
 
         View view = inflater.inflate(R.layout.home_activity, container, false);
+        setUpWindowAnimations();
         savedInstanceState = getArguments();
         if (savedInstanceState != null)
             username = savedInstanceState.getString("username","username");
@@ -58,4 +63,16 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
     }
 
+    private void setUpWindowAnimations() {
+        Fade fade = new Fade();
+        fade.setDuration(2000);
+        Transition transition;
+        transition = TransitionInflater.from(getContext()).inflateTransition(R.transition.activity_fade);
+        getActivity().getWindow().setEnterTransition(transition);
+
+        Slide slide = new Slide();
+        slide.setDuration(2000);
+        getActivity().getWindow().setExitTransition(slide);
+
+    }
 }
