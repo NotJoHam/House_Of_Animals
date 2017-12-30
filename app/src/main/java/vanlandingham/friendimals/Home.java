@@ -1,8 +1,8 @@
 package vanlandingham.friendimals;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -12,18 +12,15 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
+
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.transition.ArcMotion;
-import android.transition.ChangeBounds;
+
 import android.transition.Fade;
 import android.transition.Slide;
-import android.transition.Transition;
-import android.transition.TransitionInflater;
-import android.transition.TransitionManager;
+
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +31,7 @@ import android.view.animation.LayoutAnimationController;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +40,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Scanner;
 
 import vanlandingham.friendimals.Model.User;
 import vanlandingham.friendimals.fragments.featured_fragment;
@@ -50,8 +49,6 @@ import vanlandingham.friendimals.fragments.profile_fragment;
 import vanlandingham.friendimals.fragments.upload_fragment;
 
 public class Home extends AppCompatActivity {
-
-    private static String TAG = Home.class.getSimpleName();
 
 
         RelativeLayout mDrawerPane;
@@ -71,7 +68,7 @@ public class Home extends AppCompatActivity {
 
         private Bundle bundle;
         private String username;
-        private HashMap<String, String> user_info;
+
         private String mUserId;
         private FirebaseAuth mFirebaseAuth;
         private FirebaseUser mFirebaseUser;
@@ -112,8 +109,6 @@ public class Home extends AppCompatActivity {
 
             setContentView(R.layout.activity_home);
 
-
-
             setTitle(R.string.home);
 
             contextOfApplication = getApplicationContext();
@@ -139,12 +134,6 @@ public class Home extends AppCompatActivity {
             username_TextView = headerView.findViewById(R.id.userName_textView);
             username_TextView.setText(username);
 
-            TextView textView = new TextView(this);
-
-
-
-
-
             //Initialize the toolbar and set it
             toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
@@ -156,6 +145,7 @@ public class Home extends AppCompatActivity {
 
 
 
+
             try {
                 fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
 
@@ -163,13 +153,24 @@ public class Home extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+
+
+
             bundle = new Bundle();
+            bundle.putParcelable("curr_user",curr_user);
             bundle.putString("username",username);
             fragment.setArguments(bundle);
             fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
 
 
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+            try {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+            catch (NullPointerException nullpointer) {
+                Toast.makeText(contextOfApplication, "Error: NullPointerException", Toast.LENGTH_SHORT).show();
+            }
 
             toolbar_text = toolbar.findViewById(R.id.toolbar_text);
             setTitle(null);
@@ -188,7 +189,7 @@ public class Home extends AppCompatActivity {
 
             //To make the Header clickable, we add a OnClickListener to the Relative layout.
 
-            RelativeLayout header_layout = (RelativeLayout) headerView.findViewById(R.id.profileBox);
+            RelativeLayout header_layout =  headerView.findViewById(R.id.profileBox);
             header_layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -256,7 +257,7 @@ public class Home extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
 
                         selectItemFromDrawer(menuItem);
                         return true;
@@ -386,13 +387,13 @@ public class Home extends AppCompatActivity {
         }
 
         Fade fade = new Fade();
-        fade.setDuration(1000);
+        fade.setDuration(500);
         previousFragment.setExitTransition(fade);
 
         Fade enter_fade = new Fade();
 
-        enter_fade.setStartDelay(2000);
-        enter_fade.setDuration(1000);
+        enter_fade.setStartDelay(500);
+        enter_fade.setDuration(500);
         fragment.setEnterTransition(enter_fade);
 
         fragment.setArguments(bundle);
@@ -407,33 +408,6 @@ public class Home extends AppCompatActivity {
 
     } //End SelectItemFromDrawer
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch(requestCode) {
-
-            case PERMISSION_READ_EXTERNAL: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    retrieveAndSetImages();
-                }
-
-            }
-
-        }
-    }
-
-    public void retrieveAndSetImages() {
-        Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,null,null,null,null);
-
-        if (cursor!=null) {
-            cursor.moveToFirst();
-
-            for (int x=0;x < cursor.getCount();++x) {
-
-            }
-        }
-    }
 
     //For when the layout changes from portrait to landscape
     public void onConfigurationChanged(Configuration newConfig) {
@@ -475,12 +449,6 @@ public class Home extends AppCompatActivity {
 
     }
 
-    public static void setLayoutAnimation(ViewGroup panel,Context context) {
-
-        LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(context,R.anim.alpha_animation);
-        panel.setLayoutAnimation(controller);
-
-    }
 
     private void setUpWindowAnimations() {
         Fade fade = new Fade();

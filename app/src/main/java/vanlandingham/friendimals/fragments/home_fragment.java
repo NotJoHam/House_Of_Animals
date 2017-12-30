@@ -10,10 +10,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 
 import vanlandingham.friendimals.Model.Post;
 import vanlandingham.friendimals.Adapters.homeAdapter;
+import vanlandingham.friendimals.Model.User;
 import vanlandingham.friendimals.R;
 
 /**
@@ -25,6 +32,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
     public ArrayList<String> childkey_list = new ArrayList<>();
     public ArrayList<Post> messageList = new ArrayList<>();
     private String username;
+    private User curr_user;
 
     public home_fragment() {
 
@@ -40,10 +48,26 @@ public class home_fragment extends android.support.v4.app.Fragment {
         View view = inflater.inflate(R.layout.home_activity, container, false);
         setUpWindowAnimations();
         savedInstanceState = getArguments();
-        if (savedInstanceState != null)
-            username = savedInstanceState.getString("username","username");
+
+        if (savedInstanceState != null) {
+            curr_user = savedInstanceState.getParcelable("curr_user");
+            username = savedInstanceState.getString("username", "username");
+        }
         System.out.println(username);
         ListView listView = view.findViewById(R.id.home_list);
+
+
+        FirebaseDatabase.getInstance().getReference("users").child(curr_user.getUid()).child("following").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         homeAdapter adapter = new homeAdapter(getContext(),messageList);
         listView.setAdapter(adapter);
 

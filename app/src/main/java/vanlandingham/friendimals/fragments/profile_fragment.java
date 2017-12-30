@@ -96,6 +96,8 @@ public class profile_fragment extends Fragment {
         user = bundle.getParcelable("user");
         curr_user = bundle.getParcelable("curr_user");
 
+
+
         username = user.getUsername();
         uid = user.getUid();
         adapter = new SectionsPagerAdapter(getChildFragmentManager(),uid);
@@ -110,7 +112,7 @@ public class profile_fragment extends Fragment {
         });
 
         follow_button.setText("Follow");
-        check_if_following();
+
         setFollowersandFollowing();
 
         if( uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
@@ -119,6 +121,7 @@ public class profile_fragment extends Fragment {
 
         }
         else {
+            check_if_following();
             edit_profile_button.setVisibility(view.INVISIBLE);
             follow_button.setVisibility(view.VISIBLE);
 

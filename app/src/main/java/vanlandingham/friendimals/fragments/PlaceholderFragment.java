@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -15,6 +17,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import vanlandingham.friendimals.Adapters.profile_placeholder_adapter;
 import vanlandingham.friendimals.Model.Post;
@@ -49,11 +52,12 @@ public class PlaceholderFragment extends android.support.v4.app.Fragment {
         View view = inflater.inflate(R.layout.viewpager_fragment,container,false);
 
         listView = view.findViewById(R.id.viewPager_listView);
+        uid =  FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         FirebaseDatabase.getInstance().getReference("users").child(uid).child("posts").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Upload upload = dataSnapshot.getValue(Upload.class);
+                Upload upload =   dataSnapshot.getValue(Upload.class);
 
                 user_posts.add(upload);
 

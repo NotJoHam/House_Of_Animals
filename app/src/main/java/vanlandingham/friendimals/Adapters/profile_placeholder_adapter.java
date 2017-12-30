@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import vanlandingham.friendimals.Model.Post;
 import vanlandingham.friendimals.Model.Upload;
@@ -44,10 +45,12 @@ public class profile_placeholder_adapter extends ArrayAdapter<Upload> {
         post_message = convertView.findViewById(R.id.post_message);
         post_image = convertView.findViewById(R.id.post_imageView);
 
+
+        //Glide.with(getContext()).load(upload.getUrl()).into(post_image);
         Glide.with(getContext()).load(upload.getUrl()).into(post_image);
 
-        post_message.setText(upload.getFilename());
-        post_username.setText(upload.getUsername());
+        post_message.setText(upload.getFilename().toString());
+        post_username.setText(upload.getUsername().toString());
 
         return convertView;
     }

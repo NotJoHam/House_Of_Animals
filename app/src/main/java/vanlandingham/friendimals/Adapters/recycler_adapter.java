@@ -21,6 +21,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import vanlandingham.friendimals.Model.Upload;
 import vanlandingham.friendimals.R;
@@ -92,12 +93,13 @@ public class recycler_adapter extends RecyclerView.Adapter<recycler_adapter.MyVi
 
         Upload upload = uploads.get(position);
 
+
         //featured_post featured_post = featuredList.get(position);
         //Log.d(TAG, "url: " + featured_post.getUrl());
         //Glide.with(context).using(new FirebaseImageLoader()).load(dogRef).into(holder.image);
         Glide.with(context).load(upload.getUrl()).into(holder.image);
         //Glide.with(context).load(featured_post.getUrl()).into(holder.image);
-        holder.text.setText(upload.getUsername());
+        holder.text.setText(upload.getUsername().toString());
         //holder.text.setText(username);
 
     }

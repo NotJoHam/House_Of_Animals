@@ -3,16 +3,12 @@ package vanlandingham.friendimals;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
+
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
+
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.annotation.Nullable;
+
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Slide;
 import android.view.View;
@@ -25,9 +21,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import vanlandingham.friendimals.Model.User;
 
