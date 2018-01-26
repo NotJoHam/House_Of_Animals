@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Slide;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -48,6 +49,8 @@ public class first_activity extends AppCompatActivity  {
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
+        Log.d("first_activity", "onCreate: " + mUser);
+
 
         if (mUser == null) {
             Intent intent = new Intent(getBaseContext(), LoginActivity.class);
@@ -80,6 +83,7 @@ public class first_activity extends AppCompatActivity  {
             });
 
         }
+
 
 
     }

@@ -29,4 +29,14 @@
         android:layout_alignStart="@+id/post_username"
         android:layout_below="@+id/post_username"
         android:text="This is the message" />
+
+    <TextView
+        android:id="@+id/post_time_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/post_imageView"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="9dp"
+        android:text="TextVIew" />
 </android.widget.RelativeLayout>

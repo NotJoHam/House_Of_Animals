@@ -217,6 +217,7 @@ public class UploadPhotoFragment extends Fragment {
                     long timestamp = System.currentTimeMillis();
                     String message = photo_description.getText().toString();
 
+                    //TODO: Create a value for the user class for the last time they posted and then only grab users with posts in the last few hours
                     Upload upload = new Upload(curr_user.getUsername(),UUID.randomUUID().toString(),taskSnapshot.getDownloadUrl().toString(),timestamp,message);
 
                     String uploadId = mDatabase.push().getKey();

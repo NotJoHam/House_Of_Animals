@@ -52,12 +52,12 @@ public class PlaceholderFragment extends android.support.v4.app.Fragment {
         View view = inflater.inflate(R.layout.viewpager_fragment,container,false);
 
         listView = view.findViewById(R.id.viewPager_listView);
-        uid =  FirebaseAuth.getInstance().getCurrentUser().getUid();
+
 
         FirebaseDatabase.getInstance().getReference("users").child(uid).child("posts").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Upload upload =   dataSnapshot.getValue(Upload.class);
+                Upload upload = dataSnapshot.getValue(Upload.class);
 
                 user_posts.add(upload);
 

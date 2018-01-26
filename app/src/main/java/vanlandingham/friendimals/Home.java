@@ -60,7 +60,8 @@ public class Home extends AppCompatActivity {
         private TextView toolbar_text;
         private Typeface type;
         private MenuItem menu_item;
-        android.support.v4.app.Fragment fragment = null;
+        private android.support.v4.app.Fragment fragment = null;
+        private android.support.v4.app.Fragment previousFragment = null;
         private ImageButton messages_button;
         private Menu menu;
         private User user;
@@ -68,6 +69,9 @@ public class Home extends AppCompatActivity {
 
         private Bundle bundle;
         private String username;
+
+        private Fade fade;
+        private Fade enter_fade;
 
         private String mUserId;
         private FirebaseAuth mFirebaseAuth;
@@ -133,6 +137,14 @@ public class Home extends AppCompatActivity {
             View headerView = nvDrawer.getHeaderView(0);
             username_TextView = headerView.findViewById(R.id.userName_textView);
             username_TextView.setText(username);
+
+            fade = new Fade();
+            fade.setDuration(250);
+
+            enter_fade = new Fade();
+
+            enter_fade.setStartDelay(250);
+            enter_fade.setDuration(250);
 
             //Initialize the toolbar and set it
             toolbar = findViewById(R.id.toolbar);
@@ -386,15 +398,8 @@ public class Home extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Fade fade = new Fade();
-        fade.setDuration(500);
-        previousFragment.setExitTransition(fade);
-
-        Fade enter_fade = new Fade();
-
-        enter_fade.setStartDelay(500);
-        enter_fade.setDuration(500);
-        fragment.setEnterTransition(enter_fade);
+        //previousFragment.setExitTransition(fade);
+        //fragment.setEnterTransition(enter_fade);
 
         fragment.setArguments(bundle);
         fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();

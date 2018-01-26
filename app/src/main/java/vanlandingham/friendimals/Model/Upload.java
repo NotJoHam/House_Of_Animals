@@ -1,12 +1,15 @@
 package vanlandingham.friendimals.Model;
 
+import android.support.annotation.NonNull;
+
+import java.util.Comparator;
 import java.util.Map;
 
 /**
  * Created by Owner on 12/12/2017.
  */
 
-public class Upload {
+public class Upload implements Comparable<Upload>{
 
 
     private String username;
@@ -15,9 +18,12 @@ public class Upload {
     private String url;
     private long timestamp;
 
+
     public Upload() {}
 
-    public Upload(String username,String filename,String url,long timestamp,String message) {
+
+
+    public Upload(String username, String filename, String url, long timestamp, String message) {
         this.username = username;
         this.filename = filename;
         this.url = url;
@@ -66,4 +72,14 @@ public class Upload {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    @Override
+    public int compareTo(@NonNull Upload upload) {
+
+        long compareTimestamp = upload.getTimestamp();
+        long answer = compareTimestamp-this.timestamp;
+        return (int)answer;
+    }
+
+
 }

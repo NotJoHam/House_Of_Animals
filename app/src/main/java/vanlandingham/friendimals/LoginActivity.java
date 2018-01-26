@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,9 +79,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
         mProgressView = findViewById(R.id.login_progress);
         mLoginFormView = findViewById(R.id.login_form);
 
-        if (mUser != null) {
-            retrieveUsername();
-        } else {
+
 
 
             mEmailView = findViewById(R.id.email);
@@ -123,7 +122,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
 
         }
-    }
+
 
     private void attemptLogin(Boolean isRegistering) {
         if (mAuth == null) {
@@ -193,8 +192,62 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                             Toast.makeText(LoginActivity.this, "Could Not Register: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         } else {
 
-                            UsernameDialogFragment dialog = new UsernameDialogFragment();
-                            dialog.show(getFragmentManager(), null);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(LoginActivity.this,R.style.myDialog));
+                            LayoutInflater inflater = getLayoutInflater();
+                            builder.setView(inflater.inflate(R.layout.username_dialog, null))
+                                    // Add action buttons
+                                    .setPositiveButton("Register", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // sign in the user ...
+
+                                            EditText usernameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.post_username);
+                                            String username = usernameField.getText().toString();
+                                            String userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                            boolean cancel = false;
+                                            View focusView = null;
+
+                                            if (TextUtils.isEmpty(username.trim())) {
+                                                usernameField.setError("You must enter a username!");
+                                                focusView = usernameField;
+                                                cancel = true;
+                                            }
+
+
+                                            if (cancel) {
+                                                // There was an error; don't attempt login and focus the first
+                                                // form field with an error.
+                                                UsernameDialogFragment dialogue = new UsernameDialogFragment();
+                                                dialogue.show(getFragmentManager(), null);
+                                                focusView.requestFocus();
+                                            } else {
+
+                                                //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
+
+
+                                                //This is used to set the User Object when the user is done registering and has set a username.
+                                                User user = new User(username,email,userid);
+                                                UserProfileChangeRequest.Builder builder1 = new UserProfileChangeRequest.Builder();
+                                                builder1.setDisplayName(username);
+                                                UserProfileChangeRequest request = builder1.build();
+                                                FirebaseAuth.getInstance().getCurrentUser().updateProfile(request);
+
+                                                int follower_count = 0;
+                                                int following_count = 0;
+                                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(user);
+                                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(follower_count);
+
+                                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(following_count);
+
+
+                                                Intent intent = new Intent(getBaseContext(), Home.class);
+                                                intent.putExtra("curr_user",user);
+                                                startActivity(intent);
+                                            }
+                                        }
+                                    });
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
 
 
                         }
@@ -401,8 +454,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
                                 //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
 
-                                String email = "1@1.com";
-                                //This is used to set the User Object when the user is done registering and has set a username.
+
+                               /* //This is used to set the User Object when the user is done registering and has set a username.
                                 User user = new User(username,email,userid);
                                 UserProfileChangeRequest.Builder builder1 = new UserProfileChangeRequest.Builder();
                                 builder1.setDisplayName(username);
@@ -415,8 +468,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
 
                                 Intent intent = new Intent(getActivity().getBaseContext(), Home.class);
-                                intent.putExtra("user",user);
+                                //intent.putExtra("user",user);
                                 startActivity(intent);
+                                */
                             }
                         }
                     });
