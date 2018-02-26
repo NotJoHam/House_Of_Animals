@@ -47,7 +47,7 @@
 
         </activity>
         <activity android:name=".Home">
-
+            android:hardwareAccelerated="true"
 
         </activity>
     </application>

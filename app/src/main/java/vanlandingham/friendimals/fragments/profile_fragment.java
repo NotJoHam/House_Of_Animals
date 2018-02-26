@@ -68,6 +68,7 @@ public class profile_fragment extends Fragment {
     private boolean is_following = false;
 
     private View view;
+    private Bundle bundle;
 
     private long follower_count, following_count;
 
@@ -105,18 +106,25 @@ public class profile_fragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        Bundle bundle = this.getArguments();
+        bundle = this.getArguments();
         user = bundle.getParcelable("user");
         curr_user = bundle.getParcelable("curr_user");
-
-
+        Log.d(TAG, "onResume: " + user);
 
         username = user.getUsername();
         uid = user.getUid();
-        adapter = new SectionsPagerAdapter(getChildFragmentManager(),uid);
 
-        mViewPager.setAdapter(adapter);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                setFollowersandFollowing();
+                adapter = new SectionsPagerAdapter(getChildFragmentManager(),uid);
+
+                mViewPager.setAdapter(adapter);
+            }
+        };
+        new Thread(runnable).start();
 
         mViewPager.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -127,7 +135,6 @@ public class profile_fragment extends Fragment {
 
         follow_button.setText("Follow");
 
-        setFollowersandFollowing();
 
         if( uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
             follow_button.setVisibility(view.INVISIBLE);

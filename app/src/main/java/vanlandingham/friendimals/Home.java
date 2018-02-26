@@ -1,14 +1,12 @@
 package vanlandingham.friendimals;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Typeface;
-import android.provider.MediaStore;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -21,13 +19,12 @@ import android.os.Bundle;
 import android.transition.Fade;
 import android.transition.Slide;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,8 +36,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.HashMap;
-import java.util.Scanner;
 
 import vanlandingham.friendimals.Model.User;
 import vanlandingham.friendimals.fragments.featured_fragment;
@@ -49,6 +44,8 @@ import vanlandingham.friendimals.fragments.profile_fragment;
 import vanlandingham.friendimals.fragments.upload_fragment;
 
 public class Home extends AppCompatActivity {
+
+
 
 
         RelativeLayout mDrawerPane;
@@ -68,18 +65,15 @@ public class Home extends AppCompatActivity {
         private User curr_user;
 
         private Bundle bundle;
+        private Bundle bundle1;
         private String username;
 
         private Fade fade;
         private Fade enter_fade;
+     private FirebaseAuth mFirebaseAuth;
 
-        private String mUserId;
-        private FirebaseAuth mFirebaseAuth;
-        private FirebaseUser mFirebaseUser;
-        private DatabaseReference mDatabase;
-        private final int PERMISSION_READ_EXTERNAL=111;
 
-        private static Context contextOfApplication;
+        private Context contextOfApplication = getBaseContext();
 
         //Class to switch between fragments
         public Class fragmentClass;
@@ -87,7 +81,7 @@ public class Home extends AppCompatActivity {
         public int call_class;
 
         //Fragment manager to actually switch the fragments
-        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        private android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
 
 
     @Override
@@ -110,99 +104,154 @@ public class Home extends AppCompatActivity {
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             overridePendingTransition(R.anim.slide_right,R.anim.slide_left);
+        Intent mainIntent = getIntent();
+
+        Bundle mainBundle = mainIntent.getExtras();
+        curr_user = mainBundle.getParcelable("curr_user");
+
+        username = curr_user.getUsername();
 
             setContentView(R.layout.activity_home);
 
             setTitle(R.string.home);
 
-            contextOfApplication = getApplicationContext();
-            mFirebaseAuth = FirebaseAuth.getInstance();
-            mFirebaseUser = mFirebaseAuth.getCurrentUser();
-            mDatabase = FirebaseDatabase.getInstance().getReference();
-            FirebaseAuth.getInstance().getCurrentUser().getUid();
-            mUserId = mFirebaseUser.getUid();
 
-            nvDrawer = findViewById(R.id.nvView);
-            mDrawerLayout = findViewById(R.id.drawerLayout);
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    fade = new Fade();
+                    fade.setDuration(250);
 
-            //Initialize the toggle
-            mDrawerToggle = setupDrawerToggle();
-            username_TextView = findViewById(R.id.userName_textView);
+                    enter_fade = new Fade();
+                    getWindow().setFlags(
+                            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
 
-            Intent mainIntent = getIntent();
+                    enter_fade.setStartDelay(250);
+                    enter_fade.setDuration(250);
 
-            Bundle mainBundle = mainIntent.getExtras();
-            curr_user = mainBundle.getParcelable("curr_user");
+                    contextOfApplication = getApplicationContext();
+                    mFirebaseAuth = FirebaseAuth.getInstance();
 
-            username = curr_user.getUsername();
-            View headerView = nvDrawer.getHeaderView(0);
-            username_TextView = headerView.findViewById(R.id.userName_textView);
-            username_TextView.setText(username);
 
-            fade = new Fade();
-            fade.setDuration(250);
 
-            enter_fade = new Fade();
+                    //Initialize the toolbar and set it
 
-            enter_fade.setStartDelay(250);
-            enter_fade.setDuration(250);
 
-            //Initialize the toolbar and set it
-            toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+
+
+
+                    fragmentClass = home_fragment.class;
+
+                    try {
+                        fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    bundle = new Bundle();
+                    bundle.putParcelable("curr_user",curr_user);
+                    bundle.putParcelable("user",curr_user);
+                    bundle.putString("username",username);
+
+
+                    fragment.setArguments(bundle);
+                    fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
+                    return;
+
+                }
+            };
+            new Thread(task).start();
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        nvDrawer = findViewById(R.id.nvView);
+        mDrawerLayout = findViewById(R.id.drawerLayout);
+
+        //Initialize the toggle
+        mDrawerToggle = setupDrawerToggle();
+
 
             //getSupportActionBar().setHomeAsUpIndicator(R.drawable.camera);
             //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-            fragmentClass = home_fragment.class;
-
-
-
-
-            try {
-                fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
-
-
-            bundle = new Bundle();
-            bundle.putParcelable("curr_user",curr_user);
-            bundle.putString("username",username);
-            fragment.setArguments(bundle);
-            fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
-
-
 
 
             try {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
             catch (NullPointerException nullpointer) {
-                Toast.makeText(contextOfApplication, "Error: NullPointerException", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Error: NullPointerException", Toast.LENGTH_SHORT).show();
             }
 
-            toolbar_text = toolbar.findViewById(R.id.toolbar_text);
-            setTitle(null);
-            toolbar_text.setText(R.string.app_name);
-            type = Typeface.createFromAsset(getAssets(), "fonts/Marbre_Sans_Bold.otf");
-            toolbar_text.setTypeface(type);
 
-            mDrawerLayout.addDrawerListener(mDrawerToggle);
+            //mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+                previousFragment = fragmentManager.findFragmentById(R.id.flContent);
+
+                //Attempt to create a new fragment class
+                try {
+                    fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        previousFragment.setExitTransition(fade);
+                        fragment.setEnterTransition(enter_fade);
+                        Log.d("Fragment thread: ", "run: Transition");
+
+                    }
+                };
+                new Thread(runnable).start();
+
+                fragment.setArguments(bundle);
+                fragmentManager.beginTransaction().replace(R.id.flContent, fragment).addToBackStack(null).commit();
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
 
             menu = nvDrawer.getMenu();
 
 
             menu_item = menu.findItem(R.id.Home);
+        View headerView = nvDrawer.getHeaderView(0);
 
+        username_TextView = headerView.findViewById(R.id.userName_textView);
+        username_TextView.setText(username);
+        setTitle(null);
 
+        toolbar_text = toolbar.findViewById(R.id.toolbar_text);
+        type = Typeface.createFromAsset(getAssets(), "fonts/Marbre_Sans_Bold.otf");
+        toolbar_text.setText(R.string.app_name);
+        toolbar_text.setTypeface(type);
 
             //To make the Header clickable, we add a OnClickListener to the Relative layout.
 
+
             RelativeLayout header_layout =  headerView.findViewById(R.id.profileBox);
+            username_TextView = headerView.findViewById(R.id.userName_textView);
+
             header_layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -210,18 +259,30 @@ public class Home extends AppCompatActivity {
                     toolbar_text.setTypeface(type);
                     fragmentClass = profile_fragment.class;
 
-                    try {
-                        fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    Bundle bundle1 = new Bundle();
-                    //bundle.putString("username",username);
-                    bundle1.putParcelable("curr_user",curr_user);
-                    bundle1.putParcelable("user",curr_user);
+                    /*
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            fragmentClass = profile_fragment.class;
 
-                    fragment.setArguments(bundle1);
-                    fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
+                            try {
+                                fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            Bundle bundle1 = new Bundle();
+                            Log.d("HOME: ", "run: " + curr_user);
+                            //bundle.putString("username",username);
+                            bundle1.putParcelable("curr_user",curr_user);
+                            bundle1.putParcelable("user",curr_user);
+
+                            fragment.setArguments(bundle1);
+                            fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
+                        }
+                    };
+                    new Thread(runnable).start();
+
+                    */
 
                     menu_item.setChecked(false);
                     mDrawerLayout.closeDrawers();
@@ -323,7 +384,7 @@ public class Home extends AppCompatActivity {
 * */
     private void selectItemFromDrawer(MenuItem menuItem) {
 
-        android.support.v4.app.Fragment previousFragment;
+
 
         switch (menuItem.getItemId()) {
 
@@ -390,20 +451,31 @@ public class Home extends AppCompatActivity {
 
         }
 
-        previousFragment = fragmentManager.findFragmentById(R.id.flContent);
 
-        //Attempt to create a new fragment class
-        try {
-            fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+/*
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                previousFragment = fragmentManager.findFragmentById(R.id.flContent);
 
-        //previousFragment.setExitTransition(fade);
-        //fragment.setEnterTransition(enter_fade);
+                //Attempt to create a new fragment class
+                try {
+                    fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-        fragment.setArguments(bundle);
-        fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
+                previousFragment.setExitTransition(fade);
+                fragment.setEnterTransition(enter_fade);
+                Log.d("Fragment thread: ", "run: Transition");
+                fragment.setArguments(bundle);
+                fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
+                return;
+            }
+        };
+        new Thread(runnable).start();
+*/
+
 
         //Set the current item to be checked, meaning it is already selected.
         menuItem.setChecked(true);
@@ -421,11 +493,8 @@ public class Home extends AppCompatActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    public static Context getContextOfApplication() {
-        return contextOfApplication;
-    }
 
-    public void ChangeFragment(Class fragmentClass, @Nullable User this_user) {
+    public void ChangeFragment(Class fragmentClass, @Nullable final User this_user) {
 
         try {
             fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
@@ -433,11 +502,21 @@ public class Home extends AppCompatActivity {
             e.printStackTrace();
         }
     if (fragmentClass ==profile_fragment.class) {
-        Bundle bundle1 = new Bundle();
-        //bundle.putString("username",username);
-        bundle1.putParcelable("user",this_user);
-        bundle1.putParcelable("curr_user",curr_user);
-        fragment.setArguments(bundle1);
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Bundle bundle1 = new Bundle();
+                //bundle.putString("username",username);
+                bundle1.putParcelable("user",this_user);
+                bundle1.putParcelable("curr_user",curr_user);
+                fragment.setArguments(bundle1);
+                return;
+            }
+        };
+
+        new Thread(runnable).start();
+
         menu_item.setChecked(false);
     }
         toolbar_text.setText(this_user.getUsername());

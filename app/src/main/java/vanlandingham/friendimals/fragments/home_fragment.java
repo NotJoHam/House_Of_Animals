@@ -52,7 +52,7 @@ import static android.content.ContentValues.TAG;
 public class home_fragment extends android.support.v4.app.Fragment {
 
     private int preLast;
-    private boolean has_updated;
+    private boolean has_updated = false;
     private long curr_time = System.currentTimeMillis()-50000000;
     private long prev_time;
     private int n = 1;
@@ -112,12 +112,12 @@ public class home_fragment extends android.support.v4.app.Fragment {
                         Log.d(TAG, "onComplete: user_list added");
 
                     }
-                    int num = 1;
-                    //getPosts(1);
-                    while(!getPosts(num) && num !=8){
-                        ++num;
-                        SystemClock.sleep(2000);
-                    }
+
+                    getPosts(1);
+                    //while(!getPosts(num) && num !=8){
+                      //  ++num;
+                        //SystemClock.sleep(2000);
+                    //}
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -127,6 +127,8 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
             }
         });
+
+
 /*
         for (User this_user :user_list) {
             Log.d(TAG, "initializeHome: Iterating");
@@ -272,7 +274,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
     }
 
     private boolean getPosts(int num) {
-        has_updated = false;
+
         for (User this_user : user_list) {
             Log.d(TAG, "initializeHome: Iterating " + num);
             String user_uid = this_user.getUid();
@@ -293,15 +295,17 @@ public class home_fragment extends android.support.v4.app.Fragment {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                     if (task.isSuccessful()) {
+                        Log.d(TAG, "onComplete: Was succesful");
                         for (DocumentSnapshot document : task.getResult()) {
                             Upload upload = document.toObject(Upload.class);
                             if (upload != null) {
                                 Log.d(TAG, "onChildAdded: Initializing");
+                                has_updated = true;
                                 UploadList.add(upload);
                                 Collections.sort(UploadList);
                                 adapter = new homeAdapter(getContext(), UploadList);
                                 listView.setAdapter(adapter);
-                                has_updated = true;
+
                                 if (n == following_count) {
                                     //postInitialization();
                                 }
@@ -311,6 +315,10 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
                         }
                     }
+
+                    if (!has_updated) {
+                        getPosts(++n);
+                    }
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -319,6 +327,26 @@ public class home_fragment extends android.support.v4.app.Fragment {
                 }
             });
         }
+
+        /*
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                }
+                catch (InterruptedException e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+                if (!has_updated) {
+                    getPosts(++n);
+                    Log.d(TAG, "run: " + n);
+                }
+            }
+        });
+        thread.start();
+        */
         return has_updated;
     }
 

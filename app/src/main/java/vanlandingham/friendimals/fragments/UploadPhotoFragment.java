@@ -95,7 +95,7 @@ public class UploadPhotoFragment extends Fragment {
         photo_description = view.findViewById(R.id.photo_description);
         upload_button = view.findViewById(R.id.upload_button);
 
-        applicationContext = Home.getContextOfApplication();
+        applicationContext = getContext();
         storageReference = FirebaseStorage.getInstance().getReference();
         firestore = FirebaseFirestore.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();

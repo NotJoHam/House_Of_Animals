@@ -61,6 +61,7 @@ public class upload_fragment extends android.support.v4.app.Fragment {
     private TabLayout tabLayout;
     private ViewPager pager;
     private UploadPagerAdapter adapter;
+    private View view;
     User curr_user;
 
     @Override
@@ -69,9 +70,11 @@ public class upload_fragment extends android.support.v4.app.Fragment {
         //TODO: finish the camera layout, add functionality by letting users click on photos button or allow them to take picture
         //TODO: create two fragments separately that will populate the viewpager container when the tab is switched. Do this in the getView function of the ViewPager adapter. Finish both layouts.
 
-        View view = inflater.inflate(R.layout.camera_layout, container, false);
+        view = inflater.inflate(R.layout.camera_layout, container, false);
         savedInstanceState = this.getArguments();
         curr_user = savedInstanceState.getParcelable("curr_user");
+
+
         Log.d(TAG, "onCreateView: Got curr_user from home class:" + curr_user);
 
         tabLayout = view.findViewById(R.id.upload_tabs);
@@ -80,13 +83,13 @@ public class upload_fragment extends android.support.v4.app.Fragment {
 
         pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(pager));
-
         adapter = new UploadPagerAdapter(getChildFragmentManager(), mUserId, curr_user);
         pager.setAdapter(adapter);
 
-
         return view;
     }
+
+
 
 
 

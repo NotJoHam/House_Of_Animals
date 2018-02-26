@@ -24,12 +24,14 @@ import vanlandingham.friendimals.R;
 public class featured_fragment extends android.support.v4.app.Fragment {
 
     public ArrayList<String> childkey_list = new ArrayList<>();
+    private View view;
 
     private Query query;
     private User user;
 
     private List<User> mUserList;
     public  ArrayList<featured_post> featured_post_list = new ArrayList<>();
+    private ListView listView;
     featuredAdapter adapter;
 
     public featured_fragment() {
@@ -39,16 +41,14 @@ public class featured_fragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.featured_activity, container, false);
-        final ListView listView = view.findViewById(R.id.featured_list);
-
-        mUserList = new ArrayList<>();
-
-        adapter = new featuredAdapter(getContext(),featured_post_list,featured_fragment.this);
-        listView.setAdapter(adapter);
+        view = inflater.inflate(R.layout.featured_activity, container, false);
+        listView = view.findViewById(R.id.featured_list);
 
         featured_post post = new featured_post();
+        adapter = new featuredAdapter(getContext(),featured_post_list,featured_fragment.this);
         adapter.add(post);
+        listView.setAdapter(adapter);
+
 
 
         return view;

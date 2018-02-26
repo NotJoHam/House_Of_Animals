@@ -182,6 +182,7 @@ public class SearchActivity extends AppCompatActivity{
         search_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                user = (User) adapterView.getItemAtPosition(i);
                 changeFragments(user);
             }
         });

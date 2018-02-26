@@ -68,12 +68,12 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
     private FirebaseStorage storage;
     private StorageReference imagesRef;
     private StorageReference storageRef;
-    private Bitmap bitmap = null;
     private List<Upload> uploads;
     private String username;
     private User user;
     private RelativeLayout featured_layout;
     private featured_fragment featured_fragment;
+    private featured_post post_item;
 
 
 
@@ -89,30 +89,72 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
 
     public View getView(int position, View convertView, final ViewGroup parent) {
 
-
-
-        featured_post post_item = getItem(position);
+        post_item = getItem(position);
 
         if(convertView == null) {
-            featured_postList.clear();
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.featured_fragment_activity, parent, false);
 
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.featured_fragment_activity, parent, false);
             featured_header = convertView.findViewById(R.id.featured_header);
             recyclerView = convertView.findViewById(R.id.featured_recyclerView);
             recyclerView.setLayoutManager(new NpaLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    featured_postList.clear();
 
-            user = post_item.getUser();
-            Log.d(TAG, "getView: " + user);
+                    user = post_item.getUser();
+                    Log.d(TAG, "getView: " + user);
+                    mFirebaseAuth = FirebaseAuth.getInstance();
+                    mFirebaseUser = mFirebaseAuth.getCurrentUser();
+                    mDatabaseUsers = FirebaseDatabase.getInstance().getReference("users");
+                    mDatabaseUploads = FirebaseDatabase.getInstance().getReference("uploads");
+                    storage = FirebaseStorage.getInstance();
+                    storageRef = storage.getReference();
 
-            mFirebaseAuth = FirebaseAuth.getInstance();
-            mFirebaseUser = mFirebaseAuth.getCurrentUser();
-            mDatabaseUsers = FirebaseDatabase.getInstance().getReference("users");
-            mDatabaseUploads = FirebaseDatabase.getInstance().getReference("uploads");
-            //mUserId = mFirebaseUser.getUid();
-            storage = FirebaseStorage.getInstance();
-            storageRef = storage.getReference();
+                    uploads = new ArrayList<>();
 
-            uploads = new ArrayList<>();
+                    mDatabaseUploads.addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+
+                            Upload upload = dataSnapshot.getValue(Upload.class);
+                            uploads.add(upload);
+
+                            //adapter.notifyDataSetChanged();
+                            adapter = new recycler_adapter(context, uploads, storageRef, username);
+
+                            recyclerView.setAdapter(adapter);
+
+                        }
+
+                        @Override
+                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(DataSnapshot dataSnapshot) {
+                            Upload upload = dataSnapshot.getValue(Upload.class);
+                            uploads.remove(upload);
+                            adapter = new recycler_adapter(context, uploads, storageRef, username);
+                            Log.d(TAG, "onChildRemoved: Removed");
+                            adapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            };
+            new Thread(runnable).start();
 /*
             adapter = new recycler_adapter(context,uploads,storageRef,username);
 
@@ -127,28 +169,6 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
                     featured_fragment.changeFragments(user);
                 }
             });
-/*
-            featured_layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-
-                    android.support.v4.app.Fragment fragment = null;
-                    android.support.v4.app.FragmentManager fragmentManager = ((FragmentActivity)getContext()).getSupportFragmentManager();
-                    Class fragmentClass = profile_fragment.class;
-                    try {
-                        fragment = (android.support.v4.app.Fragment) fragmentClass.newInstance();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable("user",user);
-                    fragment.setArguments(bundle);
-
-                    fragmentManager.beginTransaction().replace(R.id.flContent,fragment).addToBackStack(null).commit();
-                }
-            });
-            */
 
 
             //TODO find a way to save the data so you don't have to download all of it each time the user clears the SearchView
@@ -156,46 +176,7 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
 
             username = "Dogs";
             featured_header.setText(username);
-            mDatabaseUploads.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-
-                    Upload upload = dataSnapshot.getValue(Upload.class);
-                    uploads.add(upload);
-
-                    //adapter.notifyDataSetChanged();
-                    adapter = new recycler_adapter(context, uploads, storageRef, username);
-
-                    recyclerView.setAdapter(adapter);
-
-
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    Upload upload = dataSnapshot.getValue(Upload.class);
-                    uploads.remove(upload);
-                    adapter = new recycler_adapter(context, uploads, storageRef, username);
-                    Log.d(TAG, "onChildRemoved: Removed");
-                    adapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
 
 
             //Glide.with(getContext()).using(new FirebaseImageLoader()).load(storageRef).placeholder(R.drawable.placeholder);
