@@ -28,17 +28,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import vanlandingham.friendimals.Home;
@@ -63,6 +58,7 @@ public class UploadPhotoFragment extends Fragment {
     private Uri filePath;
     private StorageReference storageReference;
     private DatabaseReference mDatabase;
+    private FirebaseFirestore firestore;
     private String username;
     private String mUserId;
 
@@ -101,6 +97,7 @@ public class UploadPhotoFragment extends Fragment {
 
         applicationContext = Home.getContextOfApplication();
         storageReference = FirebaseStorage.getInstance().getReference();
+        firestore = FirebaseFirestore.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mUserId = FirebaseAuth.getInstance().getUid();
 
@@ -212,8 +209,6 @@ public class UploadPhotoFragment extends Fragment {
             sRef.putFile(filePath).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Toast.makeText(applicationContext, "File Uploaded", Toast.LENGTH_SHORT).show();
-
                     long timestamp = System.currentTimeMillis();
                     String message = photo_description.getText().toString();
 
@@ -222,8 +217,27 @@ public class UploadPhotoFragment extends Fragment {
 
                     String uploadId = mDatabase.push().getKey();
 
-                    mDatabase.child("uploads").child(uploadId).setValue(upload);
-                    mDatabase.child("users").child(mUserId).child("posts").child(uploadId).setValue(upload);
+                    //mDatabase.child("uploads").child(uploadId).setValue(upload);
+                    firestore.collection("users").document(mUserId).collection("posts").document(uploadId).set(upload).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(applicationContext, "File Uploaded", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    firestore.collection("uploads").document(uploadId).set(upload).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                    //mDatabase.child("users").child(mUserId).child("posts").child(uploadId).setValue(upload);
 
 
                 }

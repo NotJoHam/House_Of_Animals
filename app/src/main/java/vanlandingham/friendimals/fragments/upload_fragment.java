@@ -57,13 +57,6 @@ import static android.content.ContentValues.TAG;
 
 public class upload_fragment extends android.support.v4.app.Fragment {
 
-    private static final int PICK_IMAGE_REQUEST = 234;
-    private final int PERMISSION_READ_EXTERNAL = 111;
-    private Context applicationContext;
-    private Uri filePath;
-    private StorageReference storageReference;
-    private DatabaseReference mDatabase;
-    private String username;
     private String mUserId;
     private TabLayout tabLayout;
     private ViewPager pager;
@@ -78,15 +71,11 @@ public class upload_fragment extends android.support.v4.app.Fragment {
 
         View view = inflater.inflate(R.layout.camera_layout, container, false);
         savedInstanceState = this.getArguments();
-        username = savedInstanceState.getString("username");
         curr_user = savedInstanceState.getParcelable("curr_user");
         Log.d(TAG, "onCreateView: Got curr_user from home class:" + curr_user);
 
         tabLayout = view.findViewById(R.id.upload_tabs);
         pager = view.findViewById(R.id.upload_viewPager);
-        applicationContext = Home.getContextOfApplication();
-        storageReference = FirebaseStorage.getInstance().getReference();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
         mUserId = FirebaseAuth.getInstance().getUid();
 
         pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));

@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
@@ -21,12 +22,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,6 +135,19 @@ public class SearchActivity extends AppCompatActivity{
             updateList();
         }
         else {
+
+            FirebaseFirestore.getInstance().collection("users").whereEqualTo("username",keyword).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot documentSnapshots) {
+                    for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
+                        mUserList.add(document.toObject(User.class));
+                        user = document.toObject(User.class);
+
+                        updateList();
+                    }
+                }
+            });
+/*
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
             Query query = reference.child("users").orderByChild("username").equalTo(keyword);
             query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -146,7 +168,7 @@ public class SearchActivity extends AppCompatActivity{
 
                 }
             });
-
+*/
 
         }
     }

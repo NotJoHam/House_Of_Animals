@@ -119,6 +119,7 @@ public class Home extends AppCompatActivity {
             mFirebaseAuth = FirebaseAuth.getInstance();
             mFirebaseUser = mFirebaseAuth.getCurrentUser();
             mDatabase = FirebaseDatabase.getInstance().getReference();
+            FirebaseAuth.getInstance().getCurrentUser().getUid();
             mUserId = mFirebaseUser.getUid();
 
             nvDrawer = findViewById(R.id.nvView);

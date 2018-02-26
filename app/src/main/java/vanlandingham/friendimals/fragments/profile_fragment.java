@@ -3,6 +3,7 @@ package vanlandingham.friendimals.fragments;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -16,7 +17,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,6 +30,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.Map;
 
 import vanlandingham.friendimals.Adapters.SectionsPagerAdapter;
 import vanlandingham.friendimals.Model.User;
@@ -55,7 +69,7 @@ public class profile_fragment extends Fragment {
 
     private View view;
 
-    private int follower_count, following_count;
+    private long follower_count, following_count;
 
     private TextView followers_textView, following_textView;
 
@@ -130,6 +144,46 @@ public class profile_fragment extends Fragment {
         follow_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (is_following) {
+                    FirebaseFirestore.getInstance().collection("users").document(curr_user.getUid()).collection("following").document(user.getUid()).delete().addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    FirebaseFirestore.getInstance().collection("users").document(user.getUid()).collection("followers").document(curr_user.getUid()).delete().addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    follow_button.setText("Follow");
+                    is_following = false;
+                }
+                else {
+                    FirebaseFirestore.getInstance().collection("users").document(curr_user.getUid()).collection("following").document(user.getUid()).set(user).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    FirebaseFirestore.getInstance().collection("users").document(user.getUid()).collection("followers").document(curr_user.getUid()).set(curr_user).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    follow_button.setText("Following");
+                    is_following = true;
+                }
+            }
+        });
+
+        /*
+
+        follow_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
                 if (is_following) {
                     FirebaseDatabase.getInstance().getReference("users").child(curr_user.getUid()).child("following").child(user.getUid()).removeValue();
@@ -157,6 +211,7 @@ public class profile_fragment extends Fragment {
         dr.setCornerRadius(2500);
 
         profile_image.setImageDrawable(dr);
+        */
     }
 
     private void check_if_following() {
@@ -164,7 +219,23 @@ public class profile_fragment extends Fragment {
         Log.d(TAG, "check_if_following: user.getUid(): " + user.getUid());
         Log.d(TAG, "check_if_following: curr_user.getUid" + curr_user.getUid());
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
-        Query query = reference.child(curr_user.getUid()).child("following").orderByChild("uid").equalTo(user.getUid());
+
+        FirebaseFirestore.getInstance().collection("users").document(curr_user.getUid()).collection("following").whereEqualTo("uid",user.getUid()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+                if (e == null && !documentSnapshots.isEmpty()) {
+                    follow_button.setText("Following");
+                    Log.d(TAG, "onEvent: Executing");
+                    is_following = true;
+                }
+                else if (e != null) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        //Query query = reference.child(curr_user.getUid()).child("following").orderByChild("uid").equalTo(user.getUid());
+/*
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -182,7 +253,7 @@ public class profile_fragment extends Fragment {
 
             }
         });
-
+*/
 
         Log.d(TAG, "check_if_following: " + is_following);
 
@@ -191,6 +262,20 @@ public class profile_fragment extends Fragment {
 
     private void setFollowersandFollowing() {
 
+
+        FirebaseFirestore.getInstance().collection("users").document(user.getUid()).collection("profile_values").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot documentSnapshots) {
+                for (DocumentSnapshot document : documentSnapshots) {
+                    Map<String,Object> documentData = document.getData();
+                    follower_count = (Long) documentData.get("follower_count");
+                    following_count = (Long) documentData.get("following_count");
+                    followers_textView.setText(Long.toString(follower_count));
+                    following_textView.setText(Long.toString(following_count));
+                }
+            }
+        });
+/*
         FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -217,8 +302,9 @@ public class profile_fragment extends Fragment {
 
             }
         });
-
+*/
     }
+
 
 
 

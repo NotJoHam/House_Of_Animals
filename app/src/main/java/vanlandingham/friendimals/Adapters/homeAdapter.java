@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import vanlandingham.friendimals.Model.Post;
 import vanlandingham.friendimals.Model.Upload;
@@ -32,11 +33,13 @@ public class homeAdapter extends ArrayAdapter<Upload> {
     private TextView post_time;
     private TextView post_username;
     private ImageView post_image;
+    private List<Upload> class_uploads;
 
 
     public homeAdapter(Context context, ArrayList<Upload> uploads){
 
         super(context,0,uploads);
+        this.class_uploads = uploads;
 
     }
 
@@ -75,6 +78,12 @@ public class homeAdapter extends ArrayAdapter<Upload> {
 
 
         return convertView;
+    }
+
+    public void refill(List<Upload> uploadList) {
+        class_uploads.clear();
+        class_uploads.addAll(uploadList);
+        notifyDataSetChanged();
     }
 
 }

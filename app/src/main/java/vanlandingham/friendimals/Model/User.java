@@ -16,6 +16,8 @@ public class User implements Parcelable {
     private String username;
     private String email;
     private String uid;
+    private int follower_count;
+    private int following_count;
 
 
     public String getUid() {
@@ -29,6 +31,22 @@ public class User implements Parcelable {
     public User() {
 
 
+    }
+
+    public int getFollower_count() {
+        return follower_count;
+    }
+
+    public void setFollower_count(int follower_count) {
+        this.follower_count = follower_count;
+    }
+
+    public int getFollowing_count() {
+        return following_count;
+    }
+
+    public void setFollowing_count(int following_count) {
+        this.following_count = following_count;
     }
 
     public User(Parcel in) {
@@ -72,9 +90,9 @@ public class User implements Parcelable {
 
     public User(String username, String email, String uid) {
         this.username = username;
-
         this.email = email;
         this.uid = uid;
+
     }
 
     public void setUsername(String username) {

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +23,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import vanlandingham.friendimals.Model.User;
 
@@ -64,7 +68,22 @@ public class first_activity extends AppCompatActivity  {
 
 
 
-            mDatabase.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(mUserId);
+            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    User user = documentSnapshot.toObject(User.class);
+
+                    username = user.getUsername();
+                    Intent intent = new Intent(getBaseContext(),Home.class);
+                    intent.putExtra("curr_user",user);
+                    startActivity(intent);
+                    showProgress(false);
+                }
+            });
+
+
+            /*mDatabase.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     User user = dataSnapshot.getValue(User.class);
@@ -81,6 +100,7 @@ public class first_activity extends AppCompatActivity  {
 
                 }
             });
+            */
 
         }
 

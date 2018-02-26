@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,9 +47,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vanlandingham.friendimals.Model.User;
 
@@ -65,6 +71,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
     private String email;
     private String username;
     private FirebaseUser mUser;
+    private Map<String,Object> profile_values;
+    private String userid;
 
 
     private FirebaseAuth mAuth;
@@ -202,8 +210,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                                             // sign in the user ...
 
                                             EditText usernameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.post_username);
-                                            String username = usernameField.getText().toString();
-                                            String userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                            username = usernameField.getText().toString();
+                                            userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                                             boolean cancel = false;
                                             View focusView = null;
 
@@ -224,6 +232,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
                                                 //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
 
+                                                profile_values = new HashMap<>();
+
+                                                profile_values.put("follower_count",0);
+                                                profile_values.put("following_count",0);
+                                                profile_values.put("num_posts",0);
 
                                                 //This is used to set the User Object when the user is done registering and has set a username.
                                                 User user = new User(username,email,userid);
@@ -232,12 +245,38 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                                                 UserProfileChangeRequest request = builder1.build();
                                                 FirebaseAuth.getInstance().getCurrentUser().updateProfile(request);
 
-                                                int follower_count = 0;
-                                                int following_count = 0;
-                                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(user);
-                                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(follower_count);
 
-                                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(following_count);
+                                                FirebaseFirestore.getInstance().collection("users").document(userid).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        FirebaseFirestore.getInstance().collection("users").document(userid).collection("profile_values").add(profile_values).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                            @Override
+                                                            public void onSuccess(DocumentReference documentReference) {
+                                                                Toast.makeText(LoginActivity.this,"Successfully registered!",Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        });
+                                                    }
+                                                }).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+
+
+
+
+
+
+                                                //FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(user);
+                                                //FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(follower_count);
+
+                                                //FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(following_count);
 
 
                                                 Intent intent = new Intent(getBaseContext(), Home.class);
@@ -294,7 +333,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
 
-
+        FirebaseFirestore.getInstance().collection("users").document(mUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                User user = documentSnapshot.toObject(User.class);
+                Intent intent = new Intent(getBaseContext(), Home.class);
+                intent.putExtra("curr_user", user);
+                startActivity(intent);
+                showProgress(false);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(LoginActivity.this, "Couldn't get user info. Please try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
+/*
         mDatabase.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -312,6 +366,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
             }
         });
+        */
 
     }
 
