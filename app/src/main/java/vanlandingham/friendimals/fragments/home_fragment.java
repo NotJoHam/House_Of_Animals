@@ -140,7 +140,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
 
             if (following_count < 20) {
-                startTime = System.currentTimeMillis() - (172800000 *num);
+                startTime = System.currentTimeMillis() - (17280000 *num);
             } else if (following_count < 100) {
                 startTime = System.currentTimeMillis() - (6400000 *num);
             } else if (following_count < 500) {

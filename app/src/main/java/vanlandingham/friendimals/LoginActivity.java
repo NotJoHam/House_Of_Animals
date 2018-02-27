@@ -87,49 +87,46 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
         mProgressView = findViewById(R.id.login_progress);
         mLoginFormView = findViewById(R.id.login_form);
 
+        mEmailView = findViewById(R.id.email);
 
+        mPasswordView = findViewById(R.id.password);
+        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
 
-
-            mEmailView = findViewById(R.id.email);
-
-            mPasswordView = findViewById(R.id.password);
-            mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-
-                    if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                        attemptLogin(false);
-                        return true;
-                    }
-
-                    return false;
-                }
-            });
-
-            final Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
-            mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    mgr.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
-
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
                     attemptLogin(false);
+                    return true;
                 }
-            });
 
-            final Button mRegisterButton = findViewById(R.id.email_registration_button);
-            mRegisterButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    mgr.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+                return false;
+            }
+        });
 
-                    attemptLogin(true);
-                }
-            });
+        final Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                mgr.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+
+                attemptLogin(false);
+            }
+        });
+
+        final Button mRegisterButton = findViewById(R.id.email_registration_button);
+        mRegisterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                mgr.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+
+                attemptLogin(true);
+            }
+        });
 
 
-        }
+    }
 
 
     private void attemptLogin(Boolean isRegistering) {
@@ -191,108 +188,111 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                 mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        //Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-
                         showProgress(false);
                         if (!task.isSuccessful()) {
-                            Log.w( "onComplete: ",task.getException() );
+                            Log.w("onComplete: ", task.getException());
                             Toast.makeText(LoginActivity.this, "Could Not Register: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         } else {
 
-                            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(LoginActivity.this,R.style.myDialog));
                             LayoutInflater inflater = getLayoutInflater();
-                            builder.setView(inflater.inflate(R.layout.username_dialog, null))
-                                    // Add action buttons
-                                    .setPositiveButton("Register", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // sign in the user ...
 
-                                            EditText usernameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.post_username);
+                            final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(LoginActivity.this, R.style.myDialog))
+                                    .setView(inflater.inflate(R.layout.username_dialog, null))
+                                    .setPositiveButton("Register", null) //Set to null. We override the onclick
+                                    .create();
+
+                            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                @Override
+                                public void onShow(DialogInterface dialogInterface) {
+
+                                    Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                                    button.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+
+                                            final EditText usernameField = dialog.findViewById(R.id.post_username);
                                             username = usernameField.getText().toString();
                                             userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                            boolean cancel = false;
-                                            View focusView = null;
 
+                                            //User attempts to make a blank username
                                             if (TextUtils.isEmpty(username.trim())) {
                                                 usernameField.setError("You must enter a username!");
-                                                focusView = usernameField;
-                                                cancel = true;
-                                            }
 
-
-                                            if (cancel) {
-                                                // There was an error; don't attempt login and focus the first
-                                                // form field with an error.
-                                                UsernameDialogFragment dialogue = new UsernameDialogFragment();
-                                                dialogue.show(getFragmentManager(), null);
-                                                focusView.requestFocus();
                                             } else {
 
-                                                //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
-
-                                                profile_values = new HashMap<>();
-
-                                                profile_values.put("follower_count",0);
-                                                profile_values.put("following_count",0);
-                                                profile_values.put("num_posts",0);
-
-                                                //This is used to set the User Object when the user is done registering and has set a username.
-                                                User user = new User(username,email,userid);
-                                                UserProfileChangeRequest.Builder builder1 = new UserProfileChangeRequest.Builder();
-                                                builder1.setDisplayName(username);
-                                                UserProfileChangeRequest request = builder1.build();
-                                                FirebaseAuth.getInstance().getCurrentUser().updateProfile(request);
-
-
-                                                FirebaseFirestore.getInstance().collection("users").document(userid).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                FirebaseFirestore.getInstance().collection("usernames").document(username).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                                     @Override
-                                                    public void onSuccess(Void aVoid) {
-                                                        FirebaseFirestore.getInstance().collection("users").document(userid).collection("profile_values").add(profile_values).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                            @Override
-                                                            public void onSuccess(DocumentReference documentReference) {
-                                                                Toast.makeText(LoginActivity.this,"Successfully registered!",Toast.LENGTH_SHORT).show();
-                                                            }
-                                                        }).addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-                                                                Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
-                                                            }
-                                                        });
-                                                    }
-                                                }).addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        if (!documentSnapshot.exists()) {
+                                                            profile_values = new HashMap<>();
+                                                            Map<String, String> username_map = new HashMap<>();
+                                                            username_map.put("username", username);
+
+                                                            profile_values.put("follower_count", 0);
+                                                            profile_values.put("following_count", 0);
+                                                            profile_values.put("num_posts", 0);
+
+                                                            //This is used to set the User Object when the user is done registering and has set a username.
+                                                            final User user = new User(username, email, userid);
+                                                            UserProfileChangeRequest.Builder builder1 = new UserProfileChangeRequest.Builder();
+                                                            builder1.setDisplayName(username);
+                                                            UserProfileChangeRequest request = builder1.build();
+                                                            FirebaseAuth.getInstance().getCurrentUser().updateProfile(request);
+
+                                                            FirebaseFirestore.getInstance().collection("usernames").document(username).set(username_map).addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+                                                                    Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void aVoid) {
+                                                                    FirebaseFirestore.getInstance().collection("users").document(userid).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void aVoid) {
+                                                                            FirebaseFirestore.getInstance().collection("users").document(userid).collection("profile_values").add(profile_values).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                                                @Override
+                                                                                public void onSuccess(DocumentReference documentReference) {
+                                                                                    Toast.makeText(LoginActivity.this, "Successfully registered!", Toast.LENGTH_SHORT).show();
+                                                                                }
+                                                                            }).addOnFailureListener(new OnFailureListener() {
+                                                                                @Override
+                                                                                public void onFailure(@NonNull Exception e) {
+                                                                                    Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                                        @Override
+                                                                        public void onFailure(@NonNull Exception e) {
+                                                                            Toast.makeText(LoginActivity.this, "Couldn't register", Toast.LENGTH_SHORT).show();
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+
+
+                                                            Intent intent = new Intent(getBaseContext(), Home.class);
+                                                            intent.putExtra("curr_user", user);
+                                                            dialog.dismiss();
+                                                            startActivity(intent);
+                                                        } else {
+                                                            usernameField.setError("Username is already taken!");
+                                                        }
                                                     }
                                                 });
-
-
-
-
-
-
-                                                //FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(user);
-                                                //FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(follower_count);
-
-                                                //FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(following_count);
-
-
-                                                Intent intent = new Intent(getBaseContext(), Home.class);
-                                                intent.putExtra("curr_user",user);
-                                                startActivity(intent);
+                                                //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
                                             }
                                         }
                                     });
-                            AlertDialog dialog = builder.create();
+                                }
+                            });
                             dialog.show();
-
-
                         }
                     }
                 });
-            } else {
+            }
+             else {
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                             @Override
@@ -312,17 +312,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                                 }
                                 else
                                 {
-
-
                                     retrieveUsername();
-
-
                                 }
 
-                                // ...
                             }
                         });
-
             }
         }
     }
@@ -330,8 +324,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
     private void retrieveUsername () {
 
         String mUserId = FirebaseAuth.getInstance().getUid();
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-
 
         FirebaseFirestore.getInstance().collection("users").document(mUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -348,25 +340,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                 Toast.makeText(LoginActivity.this, "Couldn't get user info. Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
-/*
-        mDatabase.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-
-                username = user.getUsername();
-                Intent intent = new Intent(getBaseContext(), Home.class);
-                intent.putExtra("curr_user", user);
-                startActivity(intent);
-                showProgress(false);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        */
 
     }
 
@@ -457,7 +430,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
         mEmailView.setAdapter(adapter);
     }
 
-
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -466,72 +438,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
-    public static class UsernameDialogFragment extends DialogFragment {
-
-        public static Context context;
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            // Get the layout inflater
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-
-            // Inflate and set the layout for the dialog
-            // Pass null as the parent view because its going in the dialog layout
-            builder.setView(inflater.inflate(R.layout.username_dialog, null))
-                    // Add action buttons
-                    .setPositiveButton("Register", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            // sign in the user ...
-
-                            EditText usernameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.post_username);
-                            String username = usernameField.getText().toString();
-                            String userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                            boolean cancel = false;
-                            View focusView = null;
-
-                            if (TextUtils.isEmpty(username.trim())) {
-                                usernameField.setError("You must enter a username!");
-                                focusView = usernameField;
-                                cancel = true;
-                            }
-
-
-                            if (cancel) {
-                                // There was an error; don't attempt login and focus the first
-                                // form field with an error.
-                                UsernameDialogFragment dialogue = new UsernameDialogFragment();
-                                dialogue.show(getFragmentManager(), null);
-                                focusView.requestFocus();
-                            } else {
-
-                                //TODO: inflate new activity to get user's username, first and last name, and give the choice to change their profile picture
-
-
-                               /* //This is used to set the User Object when the user is done registering and has set a username.
-                                User user = new User(username,email,userid);
-                                UserProfileChangeRequest.Builder builder1 = new UserProfileChangeRequest.Builder();
-                                builder1.setDisplayName(username);
-                                UserProfileChangeRequest request = builder1.build();
-                                FirebaseAuth.getInstance().getCurrentUser().updateProfile(request);
-
-
-                                FirebaseDatabase.getInstance().getReference().child("users").child(userid).setValue(user);
-
-
-
-                                Intent intent = new Intent(getActivity().getBaseContext(), Home.class);
-                                //intent.putExtra("user",user);
-                                startActivity(intent);
-                                */
-                            }
-                        }
-                    });
-
-            return builder.create();
-        }
-
     }
 }

@@ -56,7 +56,7 @@ public class first_activity extends AppCompatActivity  {
         Log.d("first_activity", "onCreate: " + mUser);
 
 
-        if (mUser == null) {
+        if (mUser != null) {
             Intent intent = new Intent(getBaseContext(), LoginActivity.class);
             startActivity(intent);
         }
@@ -83,24 +83,6 @@ public class first_activity extends AppCompatActivity  {
             });
 
 
-            /*mDatabase.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    User user = dataSnapshot.getValue(User.class);
-
-                    username = user.getUsername();
-                    Intent intent = new Intent(getBaseContext(), Home.class);
-                    intent.putExtra("curr_user", user);
-                    startActivity(intent);
-                    showProgress(false);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-            */
 
         }
 
@@ -137,6 +119,5 @@ public class first_activity extends AppCompatActivity  {
         slide.setDuration(2000);
         getWindow().setExitTransition(slide);
     }
-
 
 }
