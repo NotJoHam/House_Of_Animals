@@ -147,28 +147,6 @@ public class SearchActivity extends AppCompatActivity{
                     }
                 }
             });
-/*
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-            Query query = reference.child("users").orderByChild("username").equalTo(keyword);
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
-                        Log.d(TAG, "onDataChange: found username:" + singleSnapshot.getValue(User.class).getUsername());
-
-                        mUserList.add(singleSnapshot.getValue(User.class));
-                        user = singleSnapshot.getValue(User.class);
-
-                        updateList();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-*/
 
         }
     }

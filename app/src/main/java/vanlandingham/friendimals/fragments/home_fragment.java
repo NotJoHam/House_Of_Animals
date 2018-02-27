@@ -114,10 +114,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
                     }
 
                     getPosts(1);
-                    //while(!getPosts(num) && num !=8){
-                      //  ++num;
-                        //SystemClock.sleep(2000);
-                    //}
+
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -129,146 +126,8 @@ public class home_fragment extends android.support.v4.app.Fragment {
         });
 
 
-/*
-        for (User this_user :user_list) {
-            Log.d(TAG, "initializeHome: Iterating");
-            String user_uid = this_user.getUid();
-
-            if (following_count < 20) {
-                startTime = System.currentTimeMillis()-172800000;
-            }
-
-            else if (following_count < 100) {
-                startTime = System.currentTimeMillis()-86400000;
-            }
-
-            else if (following_count < 500) {
-                startTime = System.currentTimeMillis()-14400000;
-            }
-
-            else {
-                startTime = System.currentTimeMillis() - 3600000;
-            }
-
-            firestore.collection("users").document(user_uid).collection("posts").whereGreaterThan("timestamp",0).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        for (DocumentSnapshot document :task.getResult()) {
-                            Upload upload = document.toObject(Upload.class);
-                            if (upload != null) {
-                                Log.d(TAG, "onChildAdded: Initializing");
-                                UploadList.add(upload);
-                                Collections.sort(UploadList);
-                                adapter = new homeAdapter(getContext(), UploadList);
-                                listView.setAdapter(adapter);
-
-                                if (n == following_count) {
-                                    //postInitialization();
-                                }
-                            }
-
-
-                        }
-                    }
-                }
-            });
-
-        }
-        */
-
         //TODO: Make a complex query and have a value for the last post a user posted, then only grab following users with a post last posted within 3(?) days?
-      /*  FirebaseDatabase.getInstance().getReference("users").child(curr_user.getUid()).child("following").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                User user = dataSnapshot.getValue(User.class);
-                user_list.add(user);
 
-                String user_uid = user.getUid();
-
-                if (following_count < 20) {
-                    startTime = System.currentTimeMillis()-172800000;
-                }
-
-                else if (following_count < 100) {
-                    startTime = System.currentTimeMillis()-86400000;
-                }
-
-                else if (following_count < 500) {
-                   startTime = System.currentTimeMillis()-14400000;
-                }
-
-                else {
-                    startTime = System.currentTimeMillis() - 3600000;
-                }
-
-
-                FirebaseDatabase.getInstance().getReference("users").child(user_uid).child("posts").orderByChild("timestamp").startAt((double) startTime).addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        Upload upload = dataSnapshot.getValue(Upload.class);
-                        if (upload != null) {
-                            Log.d(TAG, "onChildAdded: Initializing");
-                            UploadList.add(upload);
-                            Collections.sort(UploadList);
-                            adapter = new homeAdapter(getContext(), UploadList);
-                            listView.setAdapter(adapter);
-
-                            if (n == following_count) {
-                                postInitialization();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-
-                ++n;
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-
-
-        });
-        */
 
 
     }
@@ -281,15 +140,14 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
 
             if (following_count < 20) {
-                startTime = (System.currentTimeMillis() - 172800000) *num;
+                startTime = System.currentTimeMillis() - (172800000 *num);
             } else if (following_count < 100) {
-                startTime = (System.currentTimeMillis() - 86400000) *num;
+                startTime = System.currentTimeMillis() - (6400000 *num);
             } else if (following_count < 500) {
-                startTime = (System.currentTimeMillis() - 14400000) *num;
+                startTime = System.currentTimeMillis() - (4400000 *num);
             } else {
-                startTime = (System.currentTimeMillis() - 3600000) *num;
+                startTime = System.currentTimeMillis() - (3600000 *num);
             }
-            startTime = System.currentTimeMillis() - (2600000 *num);
 
             firestore.collection("users").document(user_uid).collection("posts").whereGreaterThan("timestamp",startTime).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
@@ -328,25 +186,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
             });
         }
 
-        /*
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500);
-                }
-                catch (InterruptedException e) {
-                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
 
-                if (!has_updated) {
-                    getPosts(++n);
-                    Log.d(TAG, "run: " + n);
-                }
-            }
-        });
-        thread.start();
-        */
         return has_updated;
     }
 

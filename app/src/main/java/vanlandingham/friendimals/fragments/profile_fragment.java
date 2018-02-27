@@ -186,26 +186,9 @@ public class profile_fragment extends Fragment {
             }
         });
 
-        /*
 
-        follow_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                if (is_following) {
-                    FirebaseDatabase.getInstance().getReference("users").child(curr_user.getUid()).child("following").child(user.getUid()).removeValue();
-                    FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("followers").child(curr_user.getUid()).removeValue();
-                    follow_button.setText("Follow");
-                    is_following = false;
-                }
-                else {
-                    FirebaseDatabase.getInstance().getReference("users").child(curr_user.getUid()).child("following").child(user.getUid()).setValue(user);
-                    FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("followers").child(curr_user.getUid()).setValue(curr_user);
-                    follow_button.setText("Following");
-                    is_following = true;
-                }
-            }
-        });
+
 
         profile_image = view.findViewById(R.id.profile_imageView);
         profile_username = view.findViewById(R.id.profile_username);
@@ -218,7 +201,7 @@ public class profile_fragment extends Fragment {
         dr.setCornerRadius(2500);
 
         profile_image.setImageDrawable(dr);
-        */
+
     }
 
     private void check_if_following() {
@@ -241,26 +224,6 @@ public class profile_fragment extends Fragment {
             }
         });
 
-        //Query query = reference.child(curr_user.getUid()).child("following").orderByChild("uid").equalTo(user.getUid());
-/*
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
-                    Log.d(TAG, "onDataChange: found username:" + singleSnapshot.getValue(User.class).getUsername());
-                    follow_button.setText("Following");
-                    is_following = true;
-                    Log.d(TAG, "onDataChange: is_following: " + is_following);
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-*/
 
         Log.d(TAG, "check_if_following: " + is_following);
 
@@ -282,34 +245,7 @@ public class profile_fragment extends Fragment {
                 }
             }
         });
-/*
-        FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                follower_count = dataSnapshot.child("follower_count").getValue(Integer.class);
-                followers_textView.setText(Integer.toString(follower_count));
 
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                following_count = dataSnapshot.child("following_count").getValue(Integer.class);
-                following_textView.setText(Integer.toString(following_count));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-*/
     }
 
 
