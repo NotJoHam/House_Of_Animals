@@ -31,6 +31,52 @@ exports.countfollowersAddFirestore = functions.firestore.document('users/{userid
     
 });
 
+exports.countPostsFirestore = functions.firestore.document('users/{userid}/posts/{posts}').onCreate(event => {
+    const collectionRef = event.data.ref.parent;
+    const countRef = collectionRef.parent;
+
+    return db.runTransaction(t => {
+        return t.get(countRef)
+            .then(doc => {
+                if (doc.exists) {
+                    var new_count = doc.data().num_posts + 1;
+                    console.log(doc.data().num_posts);
+                    t.update(countRef, { num_posts: new_count });
+                }
+
+            });
+    }).then(result => {
+        console.log('Transaction success!');
+    })
+        .catch(err => {
+            console.log('Transaction failure:', err);
+        });
+
+});
+
+exports.countPostsDeleteFirestore = functions.firestore.document('users/{userid}/posts/{posts}').onDelete(event => {
+    const collectionRef = event.data.ref.parent;
+    const countRef = collectionRef.parent;
+
+    return db.runTransaction(t => {
+        return t.get(countRef)
+            .then(doc => {
+                if (doc.exists) {
+                    var new_count = doc.data().num_posts - 1;
+                    console.log(doc.data().num_posts);
+                    t.update(countRef, { num_posts: new_count });
+                }
+
+            });
+    }).then(result => {
+        console.log('Transaction success!');
+    })
+        .catch(err => {
+            console.log('Transaction failure:', err);
+        });
+
+});
+
 exports.countfollowersDeleteFirestore = functions.firestore.document('users/{userid}/followers/{followerid}').onDelete(event => {
     const collectionRef = event.data.ref.parent;
     const countRef = collectionRef.parent;

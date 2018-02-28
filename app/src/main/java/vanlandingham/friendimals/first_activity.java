@@ -56,7 +56,7 @@ public class first_activity extends AppCompatActivity  {
         Log.d("first_activity", "onCreate: " + mUser);
 
 
-        if (mUser != null) {
+        if (mUser == null) {
             Intent intent = new Intent(getBaseContext(), LoginActivity.class);
             startActivity(intent);
         }

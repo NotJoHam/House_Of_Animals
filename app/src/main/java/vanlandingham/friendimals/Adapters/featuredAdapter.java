@@ -1,10 +1,6 @@
 package vanlandingham.friendimals.Adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,38 +8,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import vanlandingham.friendimals.Home;
 import vanlandingham.friendimals.Model.Upload;
 import vanlandingham.friendimals.Model.User;
 import vanlandingham.friendimals.NpaLinearLayoutManager;
 import vanlandingham.friendimals.R;
 import vanlandingham.friendimals.fragments.featured_fragment;
-import vanlandingham.friendimals.fragments.profile_fragment;
 
 import static android.content.ContentValues.TAG;
 
@@ -60,14 +43,7 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
     private Context context;
     private int count;
 
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
     private DatabaseReference mDatabaseUploads;
-    private DatabaseReference mDatabaseUsers;
-    private String mUserId;
-    private FirebaseStorage storage;
-    private StorageReference imagesRef;
-    private StorageReference storageRef;
     private List<Upload> uploads;
     private String username;
     private User user;
@@ -104,12 +80,7 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
 
                     user = post_item.getUser();
                     Log.d(TAG, "getView: " + user);
-                    mFirebaseAuth = FirebaseAuth.getInstance();
-                    mFirebaseUser = mFirebaseAuth.getCurrentUser();
-                    mDatabaseUsers = FirebaseDatabase.getInstance().getReference("users");
                     mDatabaseUploads = FirebaseDatabase.getInstance().getReference("uploads");
-                    storage = FirebaseStorage.getInstance();
-                    storageRef = storage.getReference();
 
                     uploads = new ArrayList<>();
 
@@ -122,7 +93,7 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
                             uploads.add(upload);
 
                             //adapter.notifyDataSetChanged();
-                            adapter = new recycler_adapter(context, uploads, storageRef, username);
+                            adapter = new recycler_adapter(context, uploads);
 
                             recyclerView.setAdapter(adapter);
 
@@ -137,7 +108,7 @@ public class featuredAdapter extends ArrayAdapter<featured_post>{
                         public void onChildRemoved(DataSnapshot dataSnapshot) {
                             Upload upload = dataSnapshot.getValue(Upload.class);
                             uploads.remove(upload);
-                            adapter = new recycler_adapter(context, uploads, storageRef, username);
+                            adapter = new recycler_adapter(context, uploads);
                             Log.d(TAG, "onChildRemoved: Removed");
                             adapter.notifyDataSetChanged();
                         }

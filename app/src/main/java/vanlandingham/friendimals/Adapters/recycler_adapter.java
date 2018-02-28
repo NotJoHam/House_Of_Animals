@@ -37,16 +37,7 @@ public class recycler_adapter extends RecyclerView.Adapter<recycler_adapter.MyVi
     private Context context;
     private List<Upload> uploads;
     private int count = 0;
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
-    private DatabaseReference mDatabase;
-    private String mUserId;
-    private FirebaseStorage storage;
-    private StorageReference selfieRef;
-    private StorageReference storageRef;
-    private StorageReference dogRef;
-    private Bitmap bitmap;
-    private String username;
+
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public TextView text;
@@ -60,11 +51,10 @@ public class recycler_adapter extends RecyclerView.Adapter<recycler_adapter.MyVi
         }
     }
 
-    public recycler_adapter(Context context, List<Upload> uploadList, StorageReference storageRef,String username) {
+    public recycler_adapter(Context context, List<Upload> uploadList) {
         this.uploads = uploadList;
         this.context = context;
-        this.storageRef = storageRef;
-        this.username = username;
+
 
     }
 

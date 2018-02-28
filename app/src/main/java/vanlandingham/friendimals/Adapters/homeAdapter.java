@@ -1,6 +1,7 @@
 package vanlandingham.friendimals.Adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +11,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.Resource;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import vanlandingham.friendimals.Model.Post;
@@ -69,11 +73,16 @@ public class homeAdapter extends ArrayAdapter<Upload> {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(upload.getTimestamp());
+        Date date = new Date(upload.getTimestamp());
 
-        holder.post_message.setText(upload.getMessage());
+        //holder.post_message.setText(upload.getMessage());
         holder.post_username.setText(upload.getUsername());
-        holder.post_time.setText(calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR) + " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND) );
+        int month = calendar.get(Calendar.MONTH) +1;
 
+        Resources res = getContext().getResources();
+        String text = String.format(res.getString(R.string.display_date),month,calendar.get(Calendar.DAY_OF_MONTH),calendar.get(Calendar.YEAR),calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),calendar.get(Calendar.SECOND));
+        holder.post_time.setText(text);
+        holder.post_message.setText(upload.getMessage());
         Glide.with(getContext()).load(upload.getUrl()).into(holder.post_image);
 
 

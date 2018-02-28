@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -56,15 +57,17 @@ public class home_fragment extends android.support.v4.app.Fragment {
     private long curr_time = System.currentTimeMillis()-50000000;
     private long prev_time;
     private int n = 1;
-    private int following_count;
+    private long following_count;
     private long startTime=0;
     private FirebaseFirestore firestore;
 
     public ArrayList<User> user_list = new ArrayList<>();
+    private ArrayList<String> uid_list = new ArrayList<>();
     public ArrayList<Upload> UploadList = new ArrayList<>();
     private homeAdapter adapter;
     private String username;
     private User curr_user;
+    private long num_of_posts=0;
 
     private ListView listView;
 
@@ -77,11 +80,7 @@ public class home_fragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-
-
         View view = inflater.inflate(R.layout.home_activity, container, false);
-
-        //setUpWindowAnimations();
         savedInstanceState = getArguments();
 
         if (savedInstanceState != null) {
@@ -90,30 +89,48 @@ public class home_fragment extends android.support.v4.app.Fragment {
         }
         System.out.println(username);
         listView = view.findViewById(R.id.home_list);
-
-        following_count = curr_user.getFollowing_count();
         firestore = FirebaseFirestore.getInstance();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                getfollowing_count();
+                Log.d(TAG, "onCreateView: first following_count:  " + following_count);
+            }
+        };
+        new Thread(runnable).start();
 
         initializeHome();
         return view;
 
     }
 
+    private void getfollowing_count(){
+
+        firestore.collection("users").document(curr_user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    following_count = (long) documentSnapshot.get("following_count");
+                    Log.d(TAG, "onSuccess: second following_count: " + following_count);
+                }
+            }
+        });
+
+    }
+
     private void initializeHome() {
 
-        Log.d(TAG, "initializeHome: Start");
-
+        curr_time = System.currentTimeMillis();
         firestore.collection("users").document(curr_user.getUid()).collection("following").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     for (DocumentSnapshot document : task.getResult()) {
-                        user_list.add(document.toObject(User.class));
-                        Log.d(TAG, "onComplete: user_list added");
-
+                        uid_list.add((String) document.get("uid"));
                     }
 
-                    getPosts(1);
+                    getNum_Posts();
 
                 }
             }
@@ -132,41 +149,63 @@ public class home_fragment extends android.support.v4.app.Fragment {
 
     }
 
+    private void getNum_Posts() {
+        for (String uid : uid_list) {
+            firestore.collection("users").document(uid).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (documentSnapshot.exists()) {
+                        num_of_posts += (long) documentSnapshot.get("num_posts");
+                        Log.d(TAG, "onSuccess: num_of_posts: " + num_of_posts);
+                    }
+                }
+            });
+        }
+        getPosts(1);
+    }
+
     private boolean getPosts(int num) {
 
-        for (User this_user : user_list) {
+        for (String this_uid : uid_list) {
             Log.d(TAG, "initializeHome: Iterating " + num);
-            String user_uid = this_user.getUid();
-
 
             if (following_count < 20) {
-                startTime = System.currentTimeMillis() - (17280000 *num);
-            } else if (following_count < 100) {
-                startTime = System.currentTimeMillis() - (6400000 *num);
-            } else if (following_count < 500) {
-                startTime = System.currentTimeMillis() - (4400000 *num);
-            } else {
-                startTime = System.currentTimeMillis() - (3600000 *num);
+                prev_time = curr_time;
+                curr_time = curr_time - 8640000;
             }
 
-            firestore.collection("users").document(user_uid).collection("posts").whereGreaterThan("timestamp",startTime).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            else if (following_count < 100) {
+                prev_time = curr_time;
+                curr_time = curr_time - 43200000;
+            }
+
+            else if (following_count < 500) {
+                prev_time = curr_time;
+                curr_time = curr_time - 7200000;
+            }
+
+            else {
+                prev_time = curr_time;
+                curr_time = curr_time - 1800000;
+            }
+
+            firestore.collection("users").document(this_uid).collection("posts").whereGreaterThan("timestamp",curr_time).whereLessThanOrEqualTo("timestamp",prev_time).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                     if (task.isSuccessful()) {
-                        Log.d(TAG, "onComplete: Was succesful");
                         for (DocumentSnapshot document : task.getResult()) {
                             Upload upload = document.toObject(Upload.class);
                             if (upload != null) {
-                                Log.d(TAG, "onChildAdded: Initializing");
                                 has_updated = true;
                                 UploadList.add(upload);
+                                int index = listView.getFirstVisiblePosition();
+                                View v = listView.getChildAt(0);
+                                int top = (v == null) ? 0 : (v.getTop() - listView.getPaddingTop());
+
                                 Collections.sort(UploadList);
                                 adapter = new homeAdapter(getContext(), UploadList);
                                 listView.setAdapter(adapter);
-
-                                if (n == following_count) {
-                                    //postInitialization();
-                                }
+                                listView.setSelectionFromTop(index, top);
 
                             }
 
@@ -174,8 +213,11 @@ public class home_fragment extends android.support.v4.app.Fragment {
                         }
                     }
 
-                    if (!has_updated) {
+                    if (!has_updated || (listView.getCount() < 3 && listView.getCount() < num_of_posts) ) {
                         getPosts(++n);
+                    }
+                    else {
+                        postInitialization();
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -191,101 +233,23 @@ public class home_fragment extends android.support.v4.app.Fragment {
     }
 
     private void postInitialization() {
+
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
-
             }
 
             @Override
             public void onScroll(AbsListView absListView, int i, int i1, int i2) {
                 final int lastItem = i + i1;
-
-                if (lastItem == i2 || i2 <= 3) {
-
-                    preLast = lastItem;
-                    ++n;
-                    Log.d(TAG, "onScroll: prev_time" + prev_time);
-
-                    if (i2 <= 3) {
-                        prev_time = curr_time;
-                        curr_time = curr_time - 432000000;
-                    }
-                    if (following_count < 20) {
-                        prev_time = curr_time;
-                        curr_time = curr_time - 86400000;
-                    }
-
-                    else if (following_count < 100) {
-                        prev_time = curr_time;
-                        curr_time = curr_time - 43200000;
-                    }
-
-                    else if (following_count < 500) {
-                        prev_time = curr_time;
-                        curr_time = curr_time - 7200000;
-                    }
-
-                    else {
-                        prev_time = curr_time;
-                        curr_time = curr_time - 1800000;
-                    }
-
-                    prev_time = curr_time;
-                    curr_time = curr_time - 100200000;
-                    Log.d(TAG, "onScroll: curr_time" + curr_time);
-
-
-
-                    for (User this_user : user_list) {
-                        String user_uid = this_user.getUid();
-
-                        FirebaseDatabase.getInstance().getReference("users").child(user_uid).child("posts").orderByChild("timestamp").startAt((double) curr_time).endAt((double) prev_time).addChildEventListener(new ChildEventListener() {
-                            @Override
-                            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                                Upload upload = dataSnapshot.getValue(Upload.class);
-                                Log.d(TAG, "onChildAdded: updating");
-                                if (upload != null && !UploadList.contains(upload)) {
-                                    if (upload.getUsername() != null) {
-                                        UploadList.add(upload);
-                                        Log.d(TAG, "onChildAdded: " + "updated : " + upload);
-                                        Collections.sort(UploadList);
-
-                                        int index = listView.getFirstVisiblePosition();
-                                        View v = listView.getChildAt(0);
-                                        int top = (v == null) ? 0 : (v.getTop() - listView.getPaddingTop());
-                                        homeAdapter adapter = new homeAdapter(getContext(), UploadList);
-                                        listView.setAdapter(adapter);
-
-                                        listView.setSelectionFromTop(index, top);
-                                    }
-                                }
-
-                            }
-
-                            @Override
-                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                            }
-
-                            @Override
-                            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                            }
-
-                            @Override
-                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
-
+                if (lastItem == i2 && listView.getCount() < num_of_posts) {
+                    if (preLast != lastItem) {
+                        if (following_count > 0 ) {
+                            Log.d(TAG, "onScroll: scrolled to bottom");
+                            has_updated = false;
+                            getPosts(1);
+                            preLast = lastItem;
+                        }
                     }
                 }
 
@@ -293,17 +257,4 @@ public class home_fragment extends android.support.v4.app.Fragment {
         });
     }
 
-
-    private void setUpWindowAnimations() {
-        Fade fade = new Fade();
-        fade.setDuration(2000);
-        Transition transition;
-        transition = TransitionInflater.from(getContext()).inflateTransition(R.transition.activity_fade);
-        getActivity().getWindow().setEnterTransition(transition);
-
-        Slide slide = new Slide();
-        slide.setDuration(2000);
-        getActivity().getWindow().setExitTransition(slide);
-
-    }
 }

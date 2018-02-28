@@ -10,4 +10,5 @@
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_register">Register</string>
+    <string name="display_date">%1d/%2d/%3d %d:%d:%d</string>
 </resources>

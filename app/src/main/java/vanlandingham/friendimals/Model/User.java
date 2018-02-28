@@ -18,6 +18,7 @@ public class User implements Parcelable {
     private String uid;
     private int follower_count;
     private int following_count;
+    private int num_posts;
 
 
     public String getUid() {
@@ -31,6 +32,14 @@ public class User implements Parcelable {
     public User() {
 
 
+    }
+
+    public int getNum_posts() {
+        return num_posts;
+    }
+
+    public void setNum_posts(int num_posts) {
+        this.num_posts = num_posts;
     }
 
     public int getFollower_count() {
