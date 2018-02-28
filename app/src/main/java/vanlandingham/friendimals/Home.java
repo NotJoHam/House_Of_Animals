@@ -194,19 +194,13 @@ public class Home extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        previousFragment.setExitTransition(fade);
-                        fragment.setEnterTransition(enter_fade);
-                        Log.d("Fragment thread: ", "run: Transition");
+                if (!previousFragment.getClass().equals(fragment.getClass())) {
 
-                    }
-                };
-                new Thread(runnable).start();
-
-                fragment.setArguments(bundle);
-                fragmentManager.beginTransaction().replace(R.id.flContent, fragment).addToBackStack(null).commit();
+                    previousFragment.setExitTransition(fade);
+                    fragment.setEnterTransition(enter_fade);
+                    fragment.setArguments(bundle);
+                    fragmentManager.beginTransaction().replace(R.id.flContent, fragment).addToBackStack(null).commit();
+                }
 
             }
 
