@@ -205,7 +205,7 @@ public class UploadPhotoFragment extends Fragment {
         if (filePath != null) {
 
             final ProgressBar progressBar = new ProgressBar(applicationContext,null,android.R.attr.progressBarStyleSmall);
-            StorageReference sRef = storageReference.child("uploads/" + System.currentTimeMillis() + "." + getFileExtension(filePath));
+            final StorageReference sRef = storageReference.child("uploads/" + System.currentTimeMillis() + "." + getFileExtension(filePath));
             sRef.putFile(filePath).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -213,7 +213,7 @@ public class UploadPhotoFragment extends Fragment {
                     String message = photo_description.getText().toString();
 
                     //TODO: Create a value for the user class for the last time they posted and then only grab users with posts in the last few hours
-                    Upload upload = new Upload(curr_user.getUsername(),UUID.randomUUID().toString(),taskSnapshot.getDownloadUrl().toString(),timestamp,message);
+                    Upload upload = new Upload(curr_user.getUsername(),UUID.randomUUID().toString(),sRef.getDownloadUrl().toString(),timestamp,message);
 
                     String uploadId = mDatabase.push().getKey();
 
